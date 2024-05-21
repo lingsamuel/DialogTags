@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Synthesis;
@@ -13,8 +14,9 @@ namespace DialogueTopicIndicator {
             { "Hearthfires.esm", "" },
             { "Dragonborn.esm", "" },
             { "LegacyoftheDragonborn.esm", "LotD" },
-            { "Alternate Start - Live Another Life.esp", "Alt Life" },
+            { "Alternate Start - Live Another Life.esp", "Alt Start" },
             { "nwsFollowerFramework.esp", "" },
+            { "Unofficial Skyrim Special Edition Patch.esp", "USSEP" },
         };
     }
 
@@ -31,6 +33,8 @@ namespace DialogueTopicIndicator {
                 .Run(args);
         }
 
+        public static Dictionary<string, string> Unamed = new Dictionary<string, string>();
+        
         public static void RunPatch(IPatcherState<ISkyrimMod, ISkyrimModGetter> state) {
             foreach (var key in Config.Value.RenameMap.Keys.ToList()) {
                 Config.Value.RenameMap[key.ToLower()] = Config.Value.RenameMap[key];
@@ -46,6 +50,7 @@ namespace DialogueTopicIndicator {
                         continue;
                     }
                 } else {
+                    Unamed[name] = "";
                     if (name.EndsWith(".esm") || name.EndsWith(".esp") || name.EndsWith(".esl")) {
                         name = name.Remove(name.Length - 4);
                     }
@@ -64,6 +69,13 @@ namespace DialogueTopicIndicator {
             }
 
             state.PatchMod.ModHeader.Flags |= SkyrimModHeader.HeaderFlag.Light;
+            
+            Console.WriteLine("=================================");
+            Console.WriteLine("Unamed mods:");
+            Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(Unamed, new JsonSerializerOptions() {
+                WriteIndented = true,
+            }));
+            Console.WriteLine("=================================");
         }
     }
 }
